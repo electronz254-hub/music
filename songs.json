@@ -1,0 +1,4 @@
+[
+  {"id":"s1","title":"Sample Hymn","artist":"Church Choir","type":"audio","url":"","category":"Hymns","lyrics":"Verse 1\nPut your lyrics here.\n\nChorus\nOne song per object in this file."},
+  {"id":"s2","title":"Sample Video","artist":"Youth Choir","type":"video","youtubeId":"PASTE_11_CHAR_ID"}
+]

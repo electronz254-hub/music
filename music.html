@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Music</title>
+<style>
+:root{--bg:#070707;--card:#121214;--line:#232327;--mu:#85858c}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:#fff;font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 16px 110px;max-width:520px;margin:auto}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 0 10px}
+h1{font-size:22px;font-weight:600}
+.ic{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:16px}
+.cv{background:linear-gradient(135deg,#2b2b30,#0c0c0e) center/cover;color:#777;display:grid;place-items:center;border-radius:10px;flex:none}
+.hero{background:#fff;color:#000;border-radius:18px;padding:14px;display:flex;align-items:center;gap:14px;cursor:pointer}
+.hero .cv{width:72px;height:72px;font-size:26px}
+.hero h2,.full h2{font:700 22px "Times New Roman",Times,serif;line-height:1.15}
+.hero small{color:#666}
+input{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;outline:0;margin-top:10px}
+.tabs{display:flex;gap:6px;margin:16px 0 4px}
+.tabs button{padding:6px 14px;border-radius:99px;color:var(--mu);border:1px solid var(--line);font-size:14px}
+.tabs .on{background:#fff;color:#000;border-color:#fff}
+.row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row .cv{width:42px;height:42px;font-size:16px}
+.t{flex:1;min-width:0;cursor:pointer}.t b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+small,.m{color:var(--mu);font-size:13px}
+.row button{font-size:17px;padding:4px 7px;color:var(--mu)}
+.mini{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:500px;margin:auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 12px 6px}
+.mini>div{display:flex;align-items:center;gap:10px}
+.mini .cv{width:40px;height:40px;font-size:15px}
+.mini .t{flex:1}
+.mini button{font-size:18px;padding:4px 6px}
+.sk{width:100%;accent-color:#fff;margin:4px 0 0;padding:0;background:none;border:0;height:4px}
+.full{position:fixed;inset:0;z-index:20;background:linear-gradient(#202026,#070707 70%);display:none;overflow:auto}
+.full.on{display:block}
+.fi{max-width:520px;margin:auto;padding:16px 24px calc(30px + env(safe-area-inset-bottom))}
+.full .big{width:min(82vw,380px);aspect-ratio:1;margin:22px auto 26px;border-radius:14px;font-size:90px;box-shadow:0 18px 50px #000a}
+.ctl{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu);margin-top:18px}
+.btn{display:flex;justify-content:center;align-items:center;gap:30px;margin-top:14px}
+.btn button{font-size:26px;width:46px;height:46px}
+.btn .pp{width:64px;height:64px;border-radius:50%;background:#fff;color:#000;font-size:24px}
+.sheet{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;z-index:30}
+.sheet.on{display:flex}
+.sheet>div{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:520px;margin:auto;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.go{background:#fff;color:#000;border-radius:12px;padding:11px;width:100%;margin-top:12px;font-weight:600}
+.go.x{background:none;color:var(--mu)}
+iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;margin-top:10px}
+#lyr{white-space:pre-wrap;line-height:1.6;margin-top:12px}
+</style></head><body>
+
+<div class="top"><h1>Music</h1><button class="ic" id="addb">+</button></div>
+<div class="hero" onclick="openFull()"><div class="cv fc">♪</div><div><h2 class="ft">Pick a song</h2><small class="fa">Tap any song below</small></div></div>
+<input id="q" placeholder="Search songs or artists">
+<div class="tabs" id="tabs"><button data-t="songs" class="on">Songs</button><button data-t="book">Songbook</button><button data-t="video">Videos</button><button data-t="fav">Favourites</button></div>
+<div id="list"></div>
+
+<div class="mini"><div><div class="cv fc" onclick="openFull()">♪</div>
+<div class="t" onclick="openFull()"><b class="ft">Nothing playing</b><small class="fa"></small></div>
+<button onclick="step(-1)">⏮</button><button class="pp" onclick="toggle()">▶</button><button onclick="step(1)">⏭</button></div>
+<input type="range" class="sk" value="0" max="100"></div>
+<audio id="au"></audio>
+
+<div class="full" id="fp"><div class="fi">
+<button class="ic" onclick="closeFull()">⌄</button>
+<div class="cv big fc">♪</div>
+<h2 class="ft">Pick a song</h2><small class="fa"></small>
+<div class="ctl"><span class="tc">0:00</span><input type="range" class="sk" value="0" max="100"><span class="td">0:00</span></div>
+<div class="btn"><button onclick="step(-1)">⏮</button><button class="pp" onclick="toggle()">▶</button><button onclick="step(1)">⏭</button></div></div></div>
+
+<div class="sheet" id="up"><div>
+<h1>Post a song</h1><input id="ut" placeholder="Title"><input id="ua" placeholder="Artist">
+<input id="uy" placeholder="YouTube link (for a video)"><p class="m" style="margin-top:10px">or choose an audio file</p>
+<input id="uf" type="file" accept="audio/*"><p class="m" style="margin-top:10px">Cover photo (optional)</p>
+<input id="uc" type="file" accept="image/*"><p id="um" class="m"></p>
+<button class="go" id="go">Post</button><button class="go x" onclick="shut()">Close</button></div></div>
+
+<div class="sheet" id="vw"><div>
+<h1 id="vt"></h1><div id="vb"></div>
+<div id="lc" style="display:none;margin-top:10px"><button class="ic" onclick="fs(-2)">A−</button> <button class="ic" onclick="fs(2)">A+</button> <button class="ic" id="lp">▶</button></div>
+<div id="lyr"></div><button class="go x" onclick="shut()">Close</button></div></div>
+
+<script>
+const CLOUD='otctgi5z',PRESET='music_unsigned';
+function put(f,dir,m){return new Promise((ok,no)=>{
+  if(CLOUD.startsWith('YOUR_'))return no(new Error('Add your Cloudinary name and preset at the top of the script'));
+  const fd=new FormData();fd.append('file',f);fd.append('upload_preset',PRESET);fd.append('folder',dir);
+  const x=new XMLHttpRequest();x.open('POST','https://api.cloudinary.com/v1_1/'+CLOUD+'/auto/upload');
+  x.upload.onprogress=e=>m(Math.round(e.loaded/e.total*100)+'% uploaded');
+  x.onload=()=>{try{const r=JSON.parse(x.responseText);r.secure_url?ok(r.secure_url):no(new Error(r.error?.message||'Upload failed'))}catch(e){no(e)}};
+  x.onerror=()=>no(new Error('Network error'));x.send(fd)})}
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),au=$('#au');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const okUrl=u=>/^https:\/\//.test(u||''),okYt=i=>/^[\w-]{11}$/.test(i||'');
+const bg=s=>okUrl(s.cover)?`background-image:url(${encodeURI(s.cover)})`:'';
+const tm=x=>isFinite(x)?Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0'):'0:00';
+let local=[],all=[],list=[],queue=[],cur=-1,tab='songs',q='',fz=16,favs=[];
+try{favs=JSON.parse(localStorage.favs||'[]')}catch{}
+
+async function load(){
+  local=[];for(const f of ['songs.json','songbook.json'])try{local=local.concat(await (await fetch(f)).json())}catch{}
+  all=local;draw();
+  try{if(window.fb){all=[...local,...await fb.list()];draw()}}catch(e){console.warn(e)}
+}
+addEventListener('fb',load);
+function draw(){
+  list=all.filter(s=>(tab=='songs'?(s.type!='video'&&s.type!='book'):tab=='book'?s.lyrics:tab=='video'?s.type=='video':favs.includes(s.id))&&((s.no||'')+' '+s.title+' '+s.artist).toLowerCase().includes(q));
+  $('#list').innerHTML=list.map((s,i)=>`<div class="row"><div class="cv" style="${bg(s)}">${okUrl(s.cover)?'':(s.no||'♪')}</div><div class="t" onclick="openS(${i})"><b>${esc(s.title)}</b><small>${esc(s.artist)}</small></div><button onclick="fav(${i})">${favs.includes(s.id)?'♥':'♡'}</button>${okUrl(s.url)?`<button onclick="dl(${i})">⬇</button>`:''}</div>`).join('')||'<p class="m" style="padding:14px 0">Nothing here yet. Tap + to post a song.</p>';
+}
+function openS(i){const s=list[i];queue=list;cur=i;
+  if(s.type=='video')return vid(s);
+  if(tab=='book'||!okUrl(s.url))return lyr(s);
+  play(s)}
+async function getR(u){const c=await caches.open('songs-v1');let r=await c.match(u);if(!r){r=await fetch(u);if(!r.ok)throw 0;await c.put(u,r.clone())}return r}
+async function src(u){try{return URL.createObjectURL(await (await getR(u)).blob())}catch{return u}}
+navigator.storage?.persist?.();
+let tok=0,ov;
+async function play(s){const t=++tok;
+  $$('.ft').forEach(e=>e.textContent=s.title);$$('.fa').forEach(e=>e.textContent=s.artist);
+  $$('.fc').forEach(e=>{e.style.cssText=bg(s);e.textContent=okUrl(s.cover)?'':'♪'})
+  const u=await src(s.url);if(t!==tok)return;if(ov)URL.revokeObjectURL(ov);ov=u.startsWith('blob:')?u:null;au.src=u;au.play().catch(()=>{})}
+function openFull(){if(au.src)$('#fp').classList.add('on')}
+function closeFull(){$('#fp').classList.remove('on')}
+function step(d){if(!queue.length)return;for(let k=0;k<queue.length;k++){cur=(cur+d+queue.length)%queue.length;const s=queue[cur];if(s.type!='video'&&okUrl(s.url))return play(s)}}
+function toggle(){if(au.src)au.paused?au.play():au.pause()}
+au.onplay=()=>$$('.pp').forEach(b=>b.textContent='⏸');au.onpause=()=>$$('.pp').forEach(b=>b.textContent='▶');au.onended=()=>step(1);
+au.ontimeupdate=()=>{$$('.sk').forEach(k=>k.value=au.duration?au.currentTime/au.duration*100:0);$('.tc').textContent=tm(au.currentTime);$('.td').textContent=tm(au.duration)};
+$$('.sk').forEach(k=>k.oninput=e=>au.duration&&(au.currentTime=e.target.value/100*au.duration));
+function fav(i){const id=list[i].id;favs=favs.includes(id)?favs.filter(x=>x!=id):[...favs,id];localStorage.favs=JSON.stringify(favs);draw()}
+async function dl(i){const s=list[i];try{const b=await (await getR(s.url)).blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=s.title+'.mp3';a.click()}catch{open(s.url)}}
+function sheet(id){shut();$(id).classList.add('on')}
+function shut(){$$('.sheet').forEach(x=>x.classList.remove('on'));$('#vb').innerHTML='';$('#lyr').textContent='';$('#lc').style.display='none'}
+function vid(s){sheet('#vw');$('#vt').textContent=s.title;if(okYt(s.youtubeId))$('#vb').innerHTML=`<iframe src="https://www.youtube.com/embed/${s.youtubeId}?autoplay=1" allow="autoplay;encrypted-media" allowfullscreen></iframe>`}
+function lyr(s){sheet('#vw');$('#vt').textContent=s.title;$('#lc').style.display='block';$('#lyr').textContent=s.lyrics||'No lyrics yet.';$('#lyr').style.fontSize=fz+'px';$('#lp').style.display=okUrl(s.url)?'':'none';$('#lp').onclick=()=>{shut();play(s)}}
+function fs(d){fz=Math.max(13,Math.min(36,fz+d));$('#lyr').style.fontSize=fz+'px'}
+$('#tabs').onclick=e=>{if(!e.target.dataset.t)return;tab=e.target.dataset.t;$$('#tabs button').forEach(b=>b.classList.toggle('on',b==e.target));draw()};
+$('#q').oninput=e=>{q=e.target.value.toLowerCase();draw()};
+$('#addb').onclick=()=>sheet('#up');
+$('#go').onclick=async()=>{
+  const t=$('#ut').value.trim(),a=$('#ua').value.trim(),y=($('#uy').value.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/)||[])[1],f=$('#uf').files[0],c=$('#uc').files[0],m=x=>$('#um').textContent=x;
+  if(!t||(!y&&!f))return m('Add a title and either a YouTube link or an audio file.');
+  if(!window.fb)return m('Online features did not load. Check your connection and reload.');
+  try{const d={title:t,artist:a||'Unknown'};
+    if(y){d.type='video';d.youtubeId=y;d.cover='https://i.ytimg.com/vi/'+y+'/hqdefault.jpg'}
+    else{d.type='audio';d.url=await put(f,'songs',m)}
+    if(c)d.cover=await put(c,'covers',m);
+    await fb.add(d);m('Posted.');load();
+  }catch(e){m('Could not post: '+(e.code||e.message))}};
+load();
+</script>
+
+<script type="module">
+try{
+const V='https://www.gstatic.com/firebasejs/10.12.2/';
+const [A,F]=await Promise.all([import(V+'firebase-app.js'),import(V+'firebase-firestore.js')]);
+const app=A.initializeApp({apiKey:"AIzaSyAHgA5uRGlRWGsQ517WNSKBNCh5FwXoxUA",authDomain:"music-312ad.firebaseapp.com",projectId:"music-312ad",storageBucket:"music-312ad.firebasestorage.app",messagingSenderId:"886161179760",appId:"1:886161179760:web:0e453457132a9420fc60b5"});
+const db=F.getFirestore(app);
+window.fb={
+  list:async()=>(await F.getDocs(F.collection(db,'songs'))).docs.map(d=>({id:d.id,...d.data()})),
+  add:d=>F.addDoc(F.collection(db,'songs'),{...d,created:F.serverTimestamp()})
+};
+dispatchEvent(new Event('fb'));
+}catch(e){console.warn('Firebase did not load',e)}
+</script></body></html>
